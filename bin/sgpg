@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'sgpg'
+require 'optparse'
+
+config_file = Sgpg::YamlConfig.new
+config_file.load
+
+options = config_file.config
+
+OptionParser.new do |opts|
+  opts.banner = 'Usage: sgpg.rb [options]'
+
+  opts.on('-d', '--disk DEV', 'Specify device disk to use to save your keys') do |dev|
+    options[:disk] = dev
+  end
+
+  opts.on('--disk-encrypt', 'If we need to use cryptsetup to open the disk.') do
+    options[:crypted] = true
+  end
+
+  opts.on('-k', '--key NAME', 'Use the key name, default use ENV["USER"]') do |name|
+    options[:keyname] = name
+  end
+
+  opts.on('-e', '--edit-key', 'Edit your secret key.') do
+    Sgpg::Main.edit_key(options)
+  end
+
+  opts.on('-l', '--list-key', "Display the last secret key #{Sgpg::MOUNTPOINT}.") do
+    Sgpg.list_keys(options[:keyname])
+  end
+
+  opts.on('-o', '--open', "Open and mount device disk at #{Sgpg::MOUNTPOINT}.") do
+    Sgpg.open(options[:disk], options[:crypted])
+  end
+
+  opts.on('-p', '--path-key PATH', 'use archive PATH') do |path|
+    raise "path #{path} didn't found" unless File.exist? path
+
+    options[:keypath] = path
+  end
+
+  opts.on('--last-master', 'Use the last archive master') do
+    options[:keypath] = Sgpg.last_key(options, 'master')
+  end
+
+  opts.on('--last-lesser', 'Use the last archive lesser (unpriviliged)') do
+    options[:keypath] = Sgpg.last_key(options, 'lesser')
+  end
+
+  opts.on('-c', '--close', 'Unmount and close disk device.') do
+    Sgpg.close(options[:disk], options[:crypted])
+  end
+
+  opts.on('-s', '--save', 'Save current optargs in the config file') do
+    config_file.save(options)
+  end
+
+  opts.on('--export', 'Export your current master key and create both archives (master and lesser)') do
+    Sgpg::Main.export_secret(options)
+    Sgpg::Main.lesser_keys(options)
+  end
+end.parse!
+
+raise 'no disk to use' if !options[:disk] || options[:disk] == ''
+raise 'no key to use' if !options[:keyname] || options[:keybase] == ''
+
+puts config_file
+
+puts "Sgpg v.#{Sgpg::VERSION}"
