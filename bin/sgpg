@@ -62,11 +62,12 @@ OptionParser.new do |opts|
     Sgpg::Main.export_secret(options)
     Sgpg::Main.lesser_keys(options)
   end
+
+  opts.on('-v', '--version', 'Display the current version.') do
+    puts "sgpg v#{Sgpg::VERSION}"
+    exit
+  end
 end.parse!
 
 raise 'no disk to use' if !options[:disk] || options[:disk] == ''
 raise 'no key to use' if !options[:keyname] || options[:keybase] == ''
-
-puts config_file
-
-puts "Sgpg v.#{Sgpg::VERSION}"
