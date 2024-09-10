@@ -5,17 +5,17 @@ require_relative 'lib/sgpg/version'
 # https://guides.rubygems.org/specification-reference/
 Gem::Specification.new do |s|
   s.name = 'sgpg'
-  s.summary = 'Awesome Ruby Project !'
+  s.summary = 'Short gpg, tool for manage your gpg key (backup tarball, unprivileged keys, etc...)'
   s.version = Sgpg::VERSION
   s.platform = Gem::Platform::RUBY
 
   s.description = <<-DESCRIPTION
-    sgpg is just an awesome gem !
+    Short gpg, tool for manage your gpg key (backup tarball, unprivileged keys, etc...)
   DESCRIPTION
 
   s.email = 'szorfein@protonmail.com'
   s.homepage = 'https://github.com/szorfein/sgpg'
-  s.license = 'MIT'
+  s.license = 'GPL-3'
   s.author = 'szorfein'
 
   s.metadata = {
@@ -34,11 +34,12 @@ Gem::Specification.new do |s|
   s.executables << 'sgpg'
   s.extra_rdoc_files = %w[README.md]
 
-  s.cert_chain = %w[certs/szorfein.pem]
-  s.signing_key = File.expand_path('~/.ssh/gem-private_key.pem')
+  # s.cert_chain = %w[certs/szorfein.pem]
+  # s.signing_key = File.expand_path('~/.ssh/gem-private_key.pem')
 
   s.required_ruby_version = '>=2.6'
-  s.requirements << 'TODO change: libmagick, v6.0'
-  s.requirements << 'TODO change: A good graphics card'
-  s.add_runtime_dependency 'thor', '~> 1.0'
+  s.requirements << 'gpg'
+  s.requirements << 'cryptsetup'
+  s.requirements << 'shred'
+  s.requirements << 'tar'
 end
