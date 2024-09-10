@@ -1,7 +1,10 @@
 # sgpg
+
 <div align="center">
 <br/>
+
 [![Gem Version](https://badge.fury.io/rb/sgpg.svg)](https://badge.fury.io/rb/sgpg)
+
 </div>
 
 Short gpg, tool for manage your gpg key (backup tarball, unprivileged keys, etc)
