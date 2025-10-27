@@ -4,6 +4,6 @@
 
 module Sgpg
   MOUNTPOINT = '/mnt/sgpg' # Better permission than /media/sgpg
-  KEYDIR = "#{MOUNTPOINT}/Persistent" # Tails Linux Comptatible
+  KEYDIR = "#{MOUNTPOINT}"
   WORKDIR = '/tmp/sgpg'
 end

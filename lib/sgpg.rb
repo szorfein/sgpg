@@ -9,9 +9,9 @@ require_relative 'sgpg/mount'
 require_relative 'sgpg/gpg'
 require_relative 'sgpg/archive'
 
-# Manage your gpg key easyly
+# Manage your gpg key
 module Sgpg
-  def self.open(disk, is_crypted = false)
+  def self.open(disk, is_crypted = nil)
     return if Dir.glob("#{Sgpg::MOUNTPOINT}/*").length >= 1
 
     puts "Open device #{disk}..."
@@ -32,10 +32,13 @@ module Sgpg
     end
   end
 
+  # https://www.rubyguides.com/2017/07/ruby-sort/
   def self.list_keys(keyname)
-    keys = Dir.glob("#{Sgpg::MOUNTPOINT}/Persistent/#{keyname}*.tar")
+    dest = Helper.search_dest
+    dest += "/#{keyname}"
+    keys = Dir.glob("#{dest}/*.tar")
+
     puts "Listing keys for #{keyname}..."
-    keys = Dir.glob("#{Sgpg::MOUNTPOINT}/Persistent/*.tar") if keys == [] || keys == ''
     puts keys
   end
 
@@ -54,7 +57,7 @@ module Sgpg
 
     print "Clearing keys located at #{Sgpg::WORKDIR}? (y/n) "
     choice = gets.chomp
-    return unless choice.match(/^y|^Y/)
+    return unless choice.match?(/^y|^Y/)
 
     puts "Clearing #{Sgpg::WORKDIR}..."
     system("shred -u #{Sgpg::WORKDIR}/*.key")
@@ -75,7 +78,7 @@ module Sgpg
     def self.export_secret(opts)
       archive = Archive.new(opts[:keypath], opts[:keyname])
       archive.create_master_tar
-      archive.move(Sgpg::KEYDIR)
+      archive.move_to_disk
       Sgpg.clear_keys
     end
 
@@ -83,7 +86,7 @@ module Sgpg
     def self.lesser_keys(opts)
       archive = Archive.new(opts[:keypath], opts[:keyname])
       archive.create_lesser_tar
-      archive.move(Sgpg::KEYDIR)
+      archive.move_to_disk
       Sgpg.clear_keys
     end
   end

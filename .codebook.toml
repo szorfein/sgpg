@@ -1,0 +1,6 @@
+words = ["cryptsetup", "optparse"]
+ignore_patterns = [
+    "[s]?gpg"
+]
+use_global = false
+

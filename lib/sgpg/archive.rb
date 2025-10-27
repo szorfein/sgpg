@@ -6,14 +6,16 @@ module Sgpg
   # Interact with program tar from unix
   class Archive
     # Code here
-    def initialize(key, name = ENV['USER'])
+    def initialize(key, name = nil)
+      raise ArgumentError, "No #{name}..." unless name
+
       @key = key || ''
       @name = name
       @date = Time.now.strftime('%Y-%m-%d')
       puts "create key #{@name}-#{@date}-master.tar"
       FileUtils.mkdir_p Sgpg::WORKDIR
       @gpg = Gpg.new(@name)
-      # make it compatabble with Tails Linux
+      # Make it compatible with Tails Linux
     end
 
     def create_master_tar
@@ -57,20 +59,42 @@ module Sgpg
       mv(tar, pathdir)
     end
 
+    # Tail Linux create an encrypted partition with a directory named Persistent
+    def move_to_disk
+      dest = Helper.search_dest
+      final_dest = "#{dest}/#{@name}" # we add the key name
+
+      Helper.mkdir(final_dest)
+      Helper.chmod('0755', final_dest)
+
+      tar = Dir.glob("#{Sgpg::WORKDIR}/*.tar")
+      raise 'No archive found.' unless tar.length >= 1
+
+      mv(tar, final_dest)
+    end
+
     private
 
     def import_secret(keys)
-      keys.each { |k| system('gpg', '-a', '--import', k) if k.match(/secret/) }
+      keys.each do |k|
+        puts "importing secret #{k}..."
+        system('gpg', '-a', '--import', k) if k.match?(/secret/)
+      end
     end
 
     def import_public(keys)
-      keys.each { |k| system('gpg', '-a', '--import', k) if k.match(/public/) }
+      keys.each do |k|
+        puts "importing public #{k}..."
+        system('gpg', '-a', '--import', k) if k.match?(/public/)
+      end
     end
 
-    # suffix should be 'master' or 'lesser' (keys without privilege)
+    # Suffix should be 'master' or 'lesser' (keys without privilege)
     def create_tar(suffix = 'master')
       if suffix == 'master'
-        system("tar -cf #{@name}-#{@date}-#{suffix}-keys.tar *.key revocation.cert")
+        # In theory, you can create the certificate any time as you have the master key
+        #system("tar -cf #{@name}-#{@date}-#{suffix}-keys.tar *.key *.cert")
+        system("tar -cf #{@name}-#{@date}-#{suffix}-keys.tar *.key")
       else
         system("tar -cf #{@name}-#{@date}-#{suffix}-keys.tar *.key")
       end
@@ -78,13 +102,10 @@ module Sgpg
 
     def mv(tar, pathdir)
       puts "Moving archive at #{pathdir}..."
-      case Helper.auth?
-      when :root
-        tar.each { |f| FileUtils.mv(f, "#{pathdir}/#{f}") }
-      when :sudo
-        tar.each { |f| system('sudo', 'mv', f, "#{pathdir}/") }
-      when :doas
-        tar.each { |f| system('doas', 'mv', f, "#{pathdir}/") }
+      tar.each do |f|
+        file = File.basename(f)
+        Helper.mv(f, pathdir)
+        Helper.chmod('0644', "#{pathdir}/#{file}")
       end
     end
   end
