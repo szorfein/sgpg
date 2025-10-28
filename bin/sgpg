@@ -16,11 +16,15 @@ OptionParser.new do |opts|
     options[:disk] = dev
   end
 
-  opts.on('--disk-encrypt', 'If we need to use cryptsetup to open the disk.') do
+  opts.on('--encrypt', 'If we need to use cryptsetup to open the disk.') do
     options[:crypted] = true
   end
 
-  opts.on('-k', '--key NAME', 'Use the key name, default use ENV["USER"]') do |name|
+  opts.on('--no-encrypt', 'Disable disk encryption.') do
+    options[:crypted] = false
+  end
+
+  opts.on('-k', '--key NAME', 'Specify the GPG key to use') do |name|
     options[:keyname] = name
   end
 
@@ -32,11 +36,7 @@ OptionParser.new do |opts|
     Sgpg.list_keys(options[:keyname])
   end
 
-  opts.on('-o', '--open', "Open and mount device disk at #{Sgpg::MOUNTPOINT}.") do
-    Sgpg.open(options[:disk], options[:crypted])
-  end
-
-  opts.on('-p', '--path-key PATH', 'use archive PATH') do |path|
+  opts.on('-p', '--path-key PATH', 'Use archive PATH') do |path|
     raise "path #{path} didn't found" unless File.exist? path
 
     options[:keypath] = path
@@ -46,21 +46,33 @@ OptionParser.new do |opts|
     options[:keypath] = Sgpg.last_key(options, 'master')
   end
 
-  opts.on('--last-lesser', 'Use the last archive lesser (unpriviliged)') do
+  opts.on('--last-lesser', 'Use the last archive lesser (secure key with no privileges)') do
     options[:keypath] = Sgpg.last_key(options, 'lesser')
+  end
+
+  opts.on('-o', '--open', "Open and mount device disk at #{Sgpg::MOUNTPOINT}.") do
+    Sgpg.open(options[:disk], options[:crypted])
   end
 
   opts.on('-c', '--close', 'Unmount and close disk device.') do
     Sgpg.close(options[:disk], options[:crypted])
   end
 
-  opts.on('-s', '--save', 'Save current optargs in the config file') do
+  opts.on('-s', '--save', 'Save current cli options in the config file') do
     config_file.save(options)
   end
 
   opts.on('--export', 'Export your current master key and create both archives (master and lesser)') do
     Sgpg::Main.export_secret(options)
     Sgpg::Main.lesser_keys(options)
+  end
+
+  opts.on('--export-pass', 'Export your password-store from pass.') do
+    Sgpg::Main.incremental_export(options[:keyname])
+  end
+
+  opts.on('--import-pass', 'Import your password-store from pass.') do
+    Sgpg::Main.incremental_import(options[:keyname])
   end
 
   opts.on('-v', '--version', 'Display the current version.') do
