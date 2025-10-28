@@ -36,10 +36,6 @@ OptionParser.new do |opts|
     Sgpg.list_keys(options[:keyname])
   end
 
-  opts.on('-o', '--open', "Open and mount device disk at #{Sgpg::MOUNTPOINT}.") do
-    Sgpg.open(options[:disk], options[:crypted])
-  end
-
   opts.on('-p', '--path-key PATH', 'Use archive PATH') do |path|
     raise "path #{path} didn't found" unless File.exist? path
 
@@ -54,6 +50,10 @@ OptionParser.new do |opts|
     options[:keypath] = Sgpg.last_key(options, 'lesser')
   end
 
+  opts.on('-o', '--open', "Open and mount device disk at #{Sgpg::MOUNTPOINT}.") do
+    Sgpg.open(options[:disk], options[:crypted])
+  end
+
   opts.on('-c', '--close', 'Unmount and close disk device.') do
     Sgpg.close(options[:disk], options[:crypted])
   end
@@ -65,6 +65,14 @@ OptionParser.new do |opts|
   opts.on('--export', 'Export your current master key and create both archives (master and lesser)') do
     Sgpg::Main.export_secret(options)
     Sgpg::Main.lesser_keys(options)
+  end
+
+  opts.on('--export-pass', 'Export your password-store from pass.') do
+    Sgpg::Main.incremental_export(options[:keyname])
+  end
+
+  opts.on('--import-pass', 'Import your password-store from pass.') do
+    Sgpg::Main.incremental_import(options[:keyname])
   end
 
   opts.on('-v', '--version', 'Display the current version.') do

@@ -1,9 +1,9 @@
 ## 1.0.0
 
 - New CLI options, `--encrypt`, `--no-encrypt`, `--export-pass`, `--import-pass`.
-- Update the destination to `/mnt/sgpg/`. Use `/mnt/sgpg/Persistent` only if the directory exist.
+- Update the destination to `/mnt/sgpg/`. Use `/mnt/sgpg/Persistent` only if the directory exist (compatible with [Tail Linux](https://tails.net/doc/persistent_storage/index.en.html)).
 - Create a directory `/mnt/sgpg/<key-name>/` for each user.
-- Can save passwords from [pass](https://www.passwordstore.org/) by incremental save with rsync
+- Can save (export/import) passwords from [pass](https://www.passwordstore.org/) by incremental save
 
 ### Bug fixes
 

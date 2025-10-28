@@ -8,6 +8,7 @@ require_relative 'sgpg/cryptsetup'
 require_relative 'sgpg/mount'
 require_relative 'sgpg/gpg'
 require_relative 'sgpg/archive'
+require_relative 'sgpg/incremental'
 
 # Manage your gpg key
 module Sgpg
@@ -23,7 +24,7 @@ module Sgpg
     end
   end
 
-  def self.close(disk, is_crypted = false)
+  def self.close(disk, is_crypted = nil)
     if is_crypted
       Mount.new('/dev/mapper/sgpg').close
       Cryptsetup.new(disk).close
@@ -74,7 +75,7 @@ module Sgpg
       Sgpg.clear_keys
     end
 
-    # export your real keys and create an archive (tar)
+    # Export your real keys and create an archive (tar)
     def self.export_secret(opts)
       archive = Archive.new(opts[:keypath], opts[:keyname])
       archive.create_master_tar
@@ -82,12 +83,36 @@ module Sgpg
       Sgpg.clear_keys
     end
 
-    # create an unpriviliged gpg key (no change can be made)
+    # Create an unprivileged GnuPG key (no change can be made)
     def self.lesser_keys(opts)
       archive = Archive.new(opts[:keypath], opts[:keyname])
       archive.create_lesser_tar
       archive.move_to_disk
       Sgpg.clear_keys
+    end
+
+    # Replace 'path/to/source' and 'path/to/destination' with actual paths on your machine. Run the script:
+    # pass store password at ~/.password-store by default
+    def self.incremental_export(keyname)
+      raise ArgumentError, 'incremental_export: No keyname' unless keyname
+
+      src = "#{ENV['HOME']}/.password-store"
+      dest = Helper.search_dest
+      dest += "/#{keyname}/.password-store"
+      puts "Exporting passwords from #{src} to #{dest}..."
+      backup = Incremental.new(src, dest)
+      backup.perform_backup
+    end
+
+    def self.incremental_import(keyname)
+      raise ArgumentError, 'incremental_export: No keyname' unless keyname
+
+      dest = "#{ENV['HOME']}/.password-store"
+      src = Helper.search_dest
+      src += "/#{keyname}/.password-store"
+      puts "Importing passwords from #{src} to #{dest}..."
+      backup = Incremental.new(src, dest)
+      backup.perform_backup
     end
   end
 end

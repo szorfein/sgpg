@@ -14,14 +14,6 @@ create a secure GnuPG key, I need to update my keys all the 6 month on each PC.
 It's a very annoying task without scripts so I've develop this tool in
 Ruby to gain in time and mental sanity :).
 
-About GnuPG security in brief and what's this tool help you to manage:
-
-- You don't need a passphrase to protect your master key (if your follow all advice)
-- Never store your master key on your computer, store it on an encrypted device.
-- Always use an unprivileged key on your working machine.
-- Create short live keys for Sign, Encrypt and Auth, maximum 6 month (less is better).
-- When importing your master keys, (try to) be offline.
-
 To start, you always need to owm/create a GnuPG key as well.
 
     gpg --expert --full-generate-key
@@ -37,7 +29,7 @@ You also need to install some dependencies:
 - Shred (to remove the master key efficiently)
 - And GnuPG of course.
 
-## Configure
+## Optional configuration
 
 The config file is located at `~/.config/sgpg/config.yml`. You can use the command line with `--save`:
 
@@ -66,6 +58,22 @@ Manually choose an archive
 
     sgpg --open # mount disk
     sgpg --path-key /mnt/sgpg/Persistent/archive.tar --edit-key
+
+Export your passwords created with the [pass](https://www.passwordstore.org/) tool:
+
+    sgpg --open # mount disk
+    sgpg --key szorfein@protonmail.com --export-pass
+    sgpg --close
+
+## About
+
+About GnuPG security in brief and what's this tool help you to manage:
+
+- You don't need a passphrase to protect your master key (if your follow all advice)
+- Never store your master key on your computer, store it on an encrypted device.
+- Always use an unprivileged key on your working machine.
+- Create short live keys for Sign, Encrypt and Auth, maximum 6 month (less is better).
+- When importing your master keys, (try to) be offline.
 
 ## Gem push
 
