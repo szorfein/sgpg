@@ -65,7 +65,7 @@ module Sgpg
       final_dest = "#{dest}/#{@name}" # we add the key name
 
       Helper.mkdir(final_dest)
-      Helper.chmod('0755', final_dest)
+      Helper.chmod('0777', final_dest)
 
       tar = Dir.glob("#{Sgpg::WORKDIR}/*.tar")
       raise 'No archive found.' unless tar.length >= 1
@@ -78,14 +78,14 @@ module Sgpg
     def import_secret(keys)
       keys.each do |k|
         puts "importing secret #{k}..."
-        system('gpg', '-a', '--import', k) if k.match?(/secret/)
+        system('gpg', '-a', '--yes', '--import', k) if k.match?(/secret/)
       end
     end
 
     def import_public(keys)
       keys.each do |k|
         puts "importing public #{k}..."
-        system('gpg', '-a', '--import', k) if k.match?(/public/)
+        system('gpg', '-a', '--yes', '--import', k) if k.match?(/public/)
       end
     end
 

@@ -9,6 +9,7 @@
 
 - Correct permission when move archive, we can't list keys with wrong permissions.
 - Don't check for `*.cert` when create archives, only `*.key`
+- Correct the last element returned from array for `--last-lesser` or `--last-master`
 
 ## 0.1.0, release 09/10/24
 

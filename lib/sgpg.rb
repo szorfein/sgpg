@@ -47,18 +47,17 @@ module Sgpg
   def self.last_key(opts, suffix = 'master')
     Sgpg.open(opts[:disk], opts[:crypted])
 
-    keys = Dir.glob("#{Sgpg::KEYDIR}/#{opts[:keyname]}*#{suffix}*.tar").sort
+    dest = Helper.search_dest
+    dest += "/#{opts[:keyname]}"
+    keys = Dir.glob("#{dest}/#{opts[:keyname]}*#{suffix}*.tar").sort
+
     raise 'No keys found' unless keys.length >= 1
 
-    keys[0]
+    keys.last
   end
 
   def self.clear_keys
     return unless Dir.glob("#{Sgpg::WORKDIR}/*.key").length >= 1
-
-    print "Clearing keys located at #{Sgpg::WORKDIR}? (y/n) "
-    choice = gets.chomp
-    return unless choice.match?(/^y|^Y/)
 
     puts "Clearing #{Sgpg::WORKDIR}..."
     system("shred -u #{Sgpg::WORKDIR}/*.key")
