@@ -3,18 +3,18 @@
 # lib/cryptsetup.rb
 
 module Sgpg
-  # Manipule program cryptsetup
+  # Control program cryptsetup
   class Cryptsetup
     class InvalidDisk < StandardError; end
 
     def initialize(disk)
-      raise "no disk #{disk} specified..." unless disk
+      raise "No disk #{disk} specified..." unless disk
 
       @disk = disk
       @mapname = 'sgpg'
     end
 
-    # tails linux make persistent volume on second partiton 'disk_name'2
+    # Tails Linux make persistent volume on second partition 'disk_name'2
     def open
       check_disk
 
@@ -48,21 +48,21 @@ module Sgpg
 
     private
 
-    def open_with(prefix = '')
+    def open_with(prefix = nil)
       if prefix
-        puts "openning disk #{@disk} with #{prefix}..."
+        puts "Opening disk #{@disk} with #{prefix}..."
       else
-        puts "openning disk #{@disk}..."
+        puts "Opening disk #{@disk}..."
       end
 
-      raise "unable to open #{@disk} #{prefix}" unless
+      raise "Unable to open #{@disk} #{prefix}" unless
         system(prefix, 'cryptsetup', 'open', '--type', 'luks', @disk, @mapname)
     end
 
-    def close_with(prefix = '')
-      puts "closing disk #{@disk}..."
+    def close_with(prefix = nil)
+      puts "Closing disk #{@disk}..."
 
-      raise "closing disk #{@disk} failed" unless
+      raise "Closing disk #{@disk} failed" unless
         system(prefix, 'cryptsetup', 'close', @mapname)
     end
   end

@@ -8,12 +8,12 @@ module Sgpg
     attr_reader :config
 
     def initialize
-      @file_dir = "#{ENV['HOME']}/.config/sgpg"
+      @file_dir = ENV['XDG_CONFIG_HOME'] ? "#{ENV['XDG_CONFIG_HOME']}/sgpg" : "#{ENV['HOME']}/.config/sgpg"
       @filename = 'config.yml'
       @full_path = "#{@file_dir}/#{@filename}"
       @config = {
-        disk: '',
-        keyname: '',
+        disk: nil,
+        keyname: nil,
         crypted: false
       }
     end

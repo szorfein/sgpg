@@ -38,30 +38,30 @@ module Sgpg
 
     protected
 
-    def open_with(prefix = '')
-      prefix == '' ? create_with_ruby : create_with_system(prefix)
+    def open_with(prefix = nil)
+      prefix ? create_with_ruby : create_with_system(prefix)
 
       raise "Unable to mount #{@disk}" unless
         system(prefix, 'mount', '-t', 'ext4', @disk, Sgpg::MOUNTPOINT)
     end
 
-    def close_with(prefix = '')
+    def close_with(prefix = nil)
       raise "Unable to umount #{@disk}" unless
         system(prefix, 'umount', Sgpg::MOUNTPOINT)
     end
 
     private
 
-    def create_wiht_ruby
+    def create_with_ruby
       FileUtils.mkdir_p Sgpg::MOUNTPOINT
       FileUtils.chown @user, @user, Sgpg::MOUNTPOINT, verbose: true
-      FileUtils.chmod 0644, Sgpg::MOUNTPOINT, verbose: true
+      FileUtils.chmod 0755, Sgpg::MOUNTPOINT, verbose: true
     end
 
     def create_with_system(prefix)
       system(prefix, 'mkdir', '-p', Sgpg::MOUNTPOINT)
       system(prefix, 'chown', "#{@user}:#{@user}", Sgpg::MOUNTPOINT)
-      system(prefix, 'chmod', '0644', Sgpg::MOUNTPOINT)
+      system(prefix, 'chmod', '0755', Sgpg::MOUNTPOINT)
     end
   end
 end
